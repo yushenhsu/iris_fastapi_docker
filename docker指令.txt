@@ -1,0 +1,84 @@
+
+步驟2：
+創建 Dockerfile： 在你的 FastAPI 應用目錄下創建一個 Dockerfile：
+
+dockerfile
+複製程式碼
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY ./requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY . /app
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+
+步驟 3：構建 Docker 映像
+在與 Dockerfile 相同的目錄下，運行以下命令來構建 Docker 映像：
+
+bash
+複製程式碼
+docker build -t fastapi-app:v2 .
+這條命令會創建一個名為 fastapi-app 的 Docker 映像，並根據 Dockerfile 的指令來構建環境和應用。
+
+
+
+
+步驟 4：運行 Docker 容器
+當映像構建完成後，可以運行該容器。使用以下命令運行 Docker 容器並綁定主機的端口：
+
+bash
+複製程式碼
+docker run -d --name fastapi-container-v2 -p 8000:8000 fastapi-app:v2
+-d：讓容器在後台運行。
+--name fastapi-container：為容器命名為 fastapi-container。
+-p 8000:8000：將主機的 8000 端口映射到容器的 8000 端口，這樣你可以通過 http://localhost:8000 訪問 FastAPI 應用。
+fastapi-app：這是之前構建的 Docker 映像的名稱。
+步驟 5：驗證應用是否運行
+在瀏覽器中，訪問以下地址來驗證 FastAPI 應用是否正常運行：
+
+bash
+複製程式碼
+http://localhost:8000/docs
+這將打開 FastAPI 的自動生成的 API 文檔介面（Swagger UI）。
+
+步驟 6：檢查運行中的容器
+你可以使用以下命令來查看運行中的 Docker 容器：
+
+bash
+複製程式碼
+docker ps
+這會顯示所有正在運行的容器，以及它們所綁定的端口。
+
+
+
+
+#測試docker中API是否正常運行
+curl -X 'POST' \
+  'http://localhost:8000/predict/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "sepal_length": 6.0,
+  "sepal_width": 2.9,
+  "petal_length": 4.5,
+  "petal_width": 1.5
+}'
+
+回傳預測1
+
+
+#使用 docker exec 進入容器的交互式 shell
+
+docker exec -it fastapi-container-v2 /bin/bash
+root@e68416d197bf:/app# ls
+Dockerfile  __pycache__  app.ipynb  app.py  iris_model.pkl  requirements.txt  traing.ipynb
+
+
+
+#停止容器
+docker stop fastapi-container-v2
